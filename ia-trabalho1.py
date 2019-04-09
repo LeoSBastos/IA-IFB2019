@@ -7,90 +7,157 @@
 - 3 missionários e 3 canibais de um lado do rio
 - atravessar todos para o outro lado
 - um barco que leva  ou 2 pessoas
-- o número de missionários de um lado não pode ser menor do que o número de canibais
+- o numero de missionários de um lado não pode ser menor do que o numero de canibais
 """
 
 class Estado:
     """
     Ideia do estado:
-    - Estado será um vetor de duas posições, aonde a primeira indica a margem aonde está o barco
-    - A segunda é um inteiro de até 4 digitos representando a disposição dos canibais e missionarios pelas margens
-        >Unidade: Missionario do Lado B do rio
-        >Dezena: Canibal do Lado B do rio
-        >Centena: Missionario do Lado A do rio
-        >Unidade de Milhar: Canibal do Lado A do rio
+    - Estado será um vetor de 5 posições, aonde a primeira indica a margem aonde está o barco
+    - As outras quatro indicam quantos canibais e missionários estam em cada margem seguindo a seguinte ordem de indice i
+        >i=1: Canibal do Lado A
+        >i=2: Missionario do Lado A
+        >i=3: Canibal do Lado B
+        >i=4: Missionario do Lado B
     """
-    # Constantes para definição dos canibais e missionarios
-    CANIBAL_A = 1000
-    CANIBAL_B = 10
-    MISSIONARIO_A = 100 
-    MISSIONARIO_B = 1
+    # Constantes para definição dos indices do lado do barco, dos canibais e missionarios de cada lado
+    LADO_BARCO = 0
+    CANIBAL_A = 1
+    MISSIONARIO_A = 2 
+    CANIBAL_B = 3
+    MISSIONARIO_B = 4
     #Constantes para definição do estado atual da margem do rio aonde está o barco
     LADO_A = 1
     LADO_B = 0
-
-    def __init__(self, state):
+    
+    def __init__(self, state = [LADO_A,3,3,0,0], father = None, cost = 0):
         self.state = state
+        # Adicionando o no pai para mostrar o caminho
+        self.father = father
+        # Vetor que armazena as ramificações do estado atual
+        self.adjacents = []
+        # Distância do movimento da raiz ate o no atual
+        self.cost = cost
 
-    def move_canibais(self, qtd):
+    def move(self, qtd_canibais, qtd_missionarios):
         # Verificação do lado que o barco está atualmente no rio
-        if(self.state[0]==LADO_A):
-            #Move os canibais de acordo com a posição do rio que eles estão e utilizazndo as constantes de disposição
-            return [LADO_B,self.state[1]+qtd*CANIBAL_B-qtd*CANIBAL_A]
+        if self.state[0] == LADO_A:
+            #Move os canibais e missionarios de acordo com a posição do rio que eles estão e utilizazndo o vetor de estados
+            return [LADO_B, self.state[CANIBAL_A]-qtd_canibais, self.state[MISSIONARIO_A]-qtd_missionarios,
+            self.state[CANIBAL_B]+qtd_canibais,self.state[MISSIONARIO_B]+qtd_missionarios]
         else:
-            return [LADO_A,self.state[1]+qtd*CANIBAL_A-qtd*CANIBAL_B]
-
-    def move_missionarios(self, qtd):
-        # Verificação do lado que o barco está atualmente no rio
-        if(self.state[0]==LADO_A):
-            #Move os missionarios de acordo com a posição do rio que eles estão e utilizazndo as constantes de disposição
-            return [LADO_B,self.state[1]+qtd*MISSIONARIO_B-qtd*MISSIONARIO_A]
+            return [LADO_A, self.state[CANIBAL_A]+qtd_canibais, self.state[MISSIONARIO_A]+qtd_missionarios,
+            self.state[CANIBAL_B]-qtd_canibais,self.state[MISSIONARIO_B]-qtd_missionarios]
+    
+    def isAlive(state):
+        #Verifica se tem mais canibais que missionarios em qualquer lado do rio, tirando a exceção de quando não tem missionarios
+        return not((state[CANIBAL_A]>state[MISSIONARIO_A] and state[MISSIONARIO_A] != 0) or 
+        (state[CANIBAL_B]>state[MISSIONARIO_B] and state[MISSIONARIO_B] != 0))
+    
+    def __eq__(self,other):
+        #Utilizado na verificacao se um no foi visitado antes
+        return self.state == other.state
+    
+    def adjacent(self):
+        #Nao deixa recriar filhos
+        if len(self.adjacents) > 0:
+            return
+        #Verifica se esta no lado A
+        if self.state[LADO_BARCO] == LADO_A:
+            #Move 2 Canibais da margem A para B somente se houver quantidade suficiente de canibais
+            if self.state[CANIBAL_A] > 1:
+                aux = move(2, 0)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+            #Move 2 Missionarios da margem A para B somente se houver quantidade suficiente de missionarios
+            if self.state[MISSIONARIO_A] > 1:
+                aux = move(0, 2)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+            #Move 1 Canibal e 1 Missionario da margem A para B somente se houver quantidade suficiente de canibais e missionarios
+            if self.state[CANIBAL_A] > 0 and self.state[MISSIONARIO_A] > 0:
+                aux = move(1, 1)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+            #Move 1 Canibal da margem A para B somente se houver quantidade suficiente de canibais
+            if self.state[CANIBAL_A] > 0:
+                aux = move(1, 0)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+            #Move 1 Missionario da margem A para B somente se houver quantidade suficiente de missionarios
+            if self.state[MISSIONARIO_A] > 0:
+                aux = move(0, 1)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+        #Se o Barco estiver na margem B
         else:
-            return [LADO_A,self.state[1]+qtd*MISSIONARIO_A-qtd*MISSIONARIO_B]
-    def isAlive(self):
-        CA = self.state[1]//CANIBAL_A
-        MA = (self.state[1]//MISSIONARIO_A) % 10
-        CB = (self.state[1]//CANIBAL_B) % 10
-        MB = self.state[1] % 10
-        return not((CA>MA and MA != 0) or (CB>MB and MB != 0))
+            #Move 2 Canibais da margem B para A somente se houver quantidade suficiente de canibais
+            if self.state[CANIBAL_B] > 1:
+                aux = move(2, 0)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+            #Move 2 Missionarios da margem B para A somente se houver quantidade suficiente de missionarios
+            if self.state[MISSIONARIO_B] > 1:
+                aux = move(0, 2)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+            #Move 1 Canibal e 1 Missionario da margem B para A somente se houver quantidade suficiente de canibais e missionarios
+            if self.state[CANIBAL_B] > 0 and self.state[MISSIONARIO_B] > 0:
+                aux = move(1, 1)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+            #Move 1 Canibal da margem B para A somente se houver quantidade suficiente de canibais
+            if self.state[CANIBAL_B] > 0:
+                aux = move(1, 0)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+            #Move 1 Missionario da margem B para A somente se houver quantidade suficiente de missionarios
+            if self.state[MISSIONARIO_B] > 0:
+                aux = move(0, 1)
+                if isAlive(aux):
+                    self.adjacents.append(Estado(aux, self, self.cost+1))
+        
 
 # Importa a estrutura de dados de pilha
-from queue import LifoQueue
+from queue import PriorityQueue
 # Classe que conterá os algoritmos de solução dos algoritmos
 class Solve:
+    def __init__(self):
+        #Estado inicial
+        self.start = Estado()
+        #Estado final
+        self.end = [0,0,0,3,3]
     """
-        DFS - DEPH-FIRST SEARCH
+        UCS - UNIFORM COST SEARCH
     """
-    def dfs(self):
+    def ucs(self):
         # Caso o nó inicial seja o nó buscado ele o retorna sem ter que entrar a busca
-        if self.start.value == self.end:
+        if self.start.state == self.end:
             return self.start
-        # Pilha: utilizada para percorer o os nós da arvore de busca
-        stack = LifoQueue()
+        # Fila priotária: utilizada para percorer os nós da arvore de busca e ordenando eles por ordem de custo
+        queue = PriorityQueue()
         # Contendo os nós que já foram visitados
         visited = list()
         # Adiciona o nó inicial a lista de nós visitados
-        stack.put(self.start)
+        queue.put((self.start.cost,self.start))
         # Percorre os nós que da árvore
-        while not stack.empty():
-            # remove da pilha o mais externo para poder testar
-            node = stack.get()
-            # se este nó já foi visitado vai para o próximo da pilha
-            if node.value in visited and node.:
+        while not queue.empty():
+            # remove da fila priotária o mais externo para poder testar
+            node = queue.get()
+            # se este nó já foi visitado vai para o próximo da fila priotária
+            if node.state in visited:
                 continue
             # se ele for o nó buscado o retorna
-            if node.value == self.end:
+            if node.state == self.end:
                 return node
             # senão o adiciona na lista de visited
-            visited.append(node.value)
-            # verifica se os missionarios estão vivos neste estado
-            if if adj.isAlive():
-                # gera os estados filhos
-                node.adjacent()
-                # visita os nós filhos e os adiciona na pilha
-                for adj in node.adjacents:
-                    # Adiciona os nós novos a pilha para que sejam visitados
-                    if adj.value not in visited:
-                        stack.put(adj)
+            visited.append(node.state)
+            # gera os estados filhos
+            node.adjacent()
+            # visita os nós filhos e os adiciona na fila priotária
+            for adj in node.adjacents:
+                # Adiciona os nós novos a fila priotária para que sejam visitados
+                if adj.state not in visited:
+                    queue.put((int(adj.cost),adj))
         # Retorna None caso não consiga encontrar 
         return None
