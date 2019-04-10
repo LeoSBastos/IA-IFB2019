@@ -30,7 +30,7 @@ class Estado:
     LADO_A = 1
     LADO_B = 0
     
-    def __init__(self, state = [LADO_A,3,3,0,0], father = None, cost = 0):
+    def __init__(self, state = [LADO_A,3,3,0,0], father = None, cost = 0, movimento = "Start"):
         self.state = state
         # Adicionando o no pai para mostrar o caminho
         self.father = father
@@ -38,6 +38,7 @@ class Estado:
         self.adjacents = []
         # Distância do movimento da raiz ate o no atual
         self.cost = cost
+        self.movimento = movimento
 
     def move(self, qtd_canibais, qtd_missionarios):
         # Verificação do lado que o barco está atualmente no rio
@@ -68,54 +69,54 @@ class Estado:
             if self.state[CANIBAL_A] > 1:
                 aux = move(2, 0)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"2 0"))
             #Move 2 Missionarios da margem A para B somente se houver quantidade suficiente de missionarios
             if self.state[MISSIONARIO_A] > 1:
                 aux = move(0, 2)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"0 2"))
             #Move 1 Canibal e 1 Missionario da margem A para B somente se houver quantidade suficiente de canibais e missionarios
             if self.state[CANIBAL_A] > 0 and self.state[MISSIONARIO_A] > 0:
                 aux = move(1, 1)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"1 1"))
             #Move 1 Canibal da margem A para B somente se houver quantidade suficiente de canibais
             if self.state[CANIBAL_A] > 0:
                 aux = move(1, 0)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"1 0"))
             #Move 1 Missionario da margem A para B somente se houver quantidade suficiente de missionarios
             if self.state[MISSIONARIO_A] > 0:
                 aux = move(0, 1)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"0 1"))
         #Se o Barco estiver na margem B
         else:
             #Move 2 Canibais da margem B para A somente se houver quantidade suficiente de canibais
             if self.state[CANIBAL_B] > 1:
                 aux = move(2, 0)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"2 0"))
             #Move 2 Missionarios da margem B para A somente se houver quantidade suficiente de missionarios
             if self.state[MISSIONARIO_B] > 1:
                 aux = move(0, 2)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"0 2"))
             #Move 1 Canibal e 1 Missionario da margem B para A somente se houver quantidade suficiente de canibais e missionarios
             if self.state[CANIBAL_B] > 0 and self.state[MISSIONARIO_B] > 0:
                 aux = move(1, 1)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"1 1"))
             #Move 1 Canibal da margem B para A somente se houver quantidade suficiente de canibais
             if self.state[CANIBAL_B] > 0:
                 aux = move(1, 0)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"1 0"))
             #Move 1 Missionario da margem B para A somente se houver quantidade suficiente de missionarios
             if self.state[MISSIONARIO_B] > 0:
                 aux = move(0, 1)
                 if isAlive(aux):
-                    self.adjacents.append(Estado(aux, self, self.cost+1))
+                    self.adjacents.append(Estado(aux, self, self.cost+1,"0 1"))
         
 
 # Importa a estrutura de dados de pilha
@@ -127,6 +128,9 @@ class Solve:
         self.start = Estado()
         #Estado final
         self.end = [0,0,0,3,3]
+    
+    
+    
     """
         UCS - UNIFORM COST SEARCH
     """
@@ -143,7 +147,7 @@ class Solve:
         # Percorre os nós que da árvore
         while not queue.empty():
             # remove da fila priotária o mais externo para poder testar
-            node = queue.get()
+            node = (queue.get())[-1]
             # se este nó já foi visitado vai para o próximo da fila priotária
             if node.state in visited:
                 continue
@@ -161,3 +165,18 @@ class Solve:
                     queue.put((int(adj.cost),adj))
         # Retorna None caso não consiga encontrar 
         return None
+
+from prettytable import PrettyTable
+
+class Impressao:
+    Tabela = PrettyTable(["Canibais A","Missionarios A","Canibais B","Missionarios B","Movimento"])
+
+    def print_solution(self,node):
+        if node is not None:
+            self.print_solution(node.father)
+            Tabela.add_column(node.state[1],node.state[2],node.state[3],node.state[4],node.movimento)
+        else:
+            return self.Tabela
+
+teste = Solve().ucs()
+print(Impressao().print_solution(teste))
