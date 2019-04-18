@@ -1,4 +1,3 @@
-
 class RegressaoLinear(object):
     MAX_INTERACOES  = 500000
     MIN_CUSTO       = 1E-5
