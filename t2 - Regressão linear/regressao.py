@@ -16,7 +16,7 @@ class RegressaoLinear(object):
         return [1, max(self.x[1])-min(self.x[1]), max(self.x[2])-min(self.x[2])]
 
     """
-    AVG - Calcula a média de todos os parâmetros de 
+    AVG - Calcula a média de todos os parâmetros de X
     """
     def avg(self):
         r = [1]
