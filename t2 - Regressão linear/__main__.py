@@ -10,19 +10,24 @@ def reader(file_name):
         # Lê o número de colunas
         colunas = int(linhas[0][0])
         # Lista de X indo de X0 ate Xn-1
-        x.append(colunas * list())
+        x.append( (colunas - 1) * list())
         # Leitura dos parâmetros, que começam na linha 6
         for l in linhas[6:]:
             c = l.split()
             for i in range(colunas+1):
+                # Y
                 if i == colunas:
                     y.append(int(c[i]))
+                # X0
+                elif i == 0:
+                    x[0].append(int(c[0]))
+                # XN com N > 0
                 else:
-                    x[i].append(int(c[0]))
+                    x[i - 1].append(int(c[0]))
     return x, y
     
 if __name__ == "__main__":
-    x, y = reader('data1.txt')
+    x, y = reader('data.txt')
 
     def h(teta, x): return sum([(teta[i]*x[i]) for i in range(len(x))])
 
