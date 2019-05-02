@@ -28,11 +28,10 @@ def reader(file_name):
     
 if __name__ == "__main__":
     x, y = reader('data.txt')
-
+    
     def h(teta, x): return sum([(teta[i]*x[i]) for i in range(len(x))])
 
     r = rl(x, y, h)
     #r.solve()
-
     #print(r.test([1, 2104, 3]))
     print(r.x, r.y)
