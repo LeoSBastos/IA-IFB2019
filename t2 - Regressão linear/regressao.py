@@ -51,14 +51,27 @@ class RegressaoLinear(object):
         return c / (2 * self.m)
 
     def atualiza_teta(self):
-        novo = list() 
-        for j in range(len(self.x[1])):
-            aux = self.alfa
-            aux *= sum([(self.h(self.teta, self.x[i]) - self.y[i])
-                        * self.x[i][j] for i in range(self.m)]) / self.m
-            aux = self.teta[j] - aux
+        # NOVO TETA: variável usada pois é não se pode alterar o teta até calcular todos so novos valores
+        novo = list()
+        # Calcula um novo valor para cada TETA
+        for t in range(len(self.teta)):
+            # Variável auxiliar utilizada para calcular o novo TETAi: inica em 1
+            aux = 0
+            # Para todos os casos de teste
+            for i in range(self.m):
+                # Incrementa em (H(teta, x) - Y) para cada Xi
+                # Forja o vetor X pegando as K colunas de uma i linha
+                # E por fim subtrai Yi * Xti
+                aux += (self.h(self.teta, [self.x[j][i] for j in range(self.x)]) - self.y[i]) * self.x[t][i]
+            # É multiplicada pela taxa de aprendizado
+            aux *= self.alfa
+            # e dividido pela quantidade de elementos
+            aux /= self.m
+            # Por fim o valor de AUX é retirado de TETAi
+            aux = self.teta[t] - aux
+            # Adiciona TETAi a lista de novos testas
             novo.append(aux)
-        print(novo)
+        # A lista de TETA recebe os NOVOS valores
         self.teta = novo
 
     """
