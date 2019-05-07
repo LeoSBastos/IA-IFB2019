@@ -1,40 +1,51 @@
 class RegressaoLinear(object):
     # Número máximo de vezes que será aplicada a regressao linear
-    MAX_INTERACOES = 5000
+    MAX_INTERACOES = 10000
     # Custo mínimo, é uma das condições de parada do método solve()
     MIN_CUSTO = 1E-5
 
-    def __init__(self, x, y, h, teta=[1]*len(x), alfa=0.00000019, normaliza = True):
+    def __init__(self, x, y, h, alfa=5E-3, normaliza = True):
         self.x = x # Matriz de variáveis para aprendizado X
         self.y = y # Matriz de resultado para aprendizado X
         self.h = h # Funcao de hipótese
         self.m = len(self.y) # Quantidade de amostras
-        self.teta = teta # Constantes da função: que serão otmizados pela regressao
+        self.teta = [1]*len(self.x)# Constantes da função: que serão otmizados pela regressao
         self.alfa = alfa # Taxa de aprendizagem
         if normaliza:
-            self.x = self.normalizar(x)
-            self.y = self.normalizar(y)
-
+            self.x = self.normalizarX(self.x)
+            self.y = self.normalizarY(self.y)
     """
     NORMALIZAR - Normaliza os valores de uma matriz
      - A normalização é aplicada linha a linha
      - Vi' = (Vi - MEDIAi) / DELTAi
     """
-    def normalizar(self, v):
-        delta = list()
-        media = list()
-        # Para todas as linhas de V
-        for i in v:
-            # calcula a media de cada parametro
-            media.append(sum(i) / m)
-            # calcula a variacao de cada parametro
-            delta.append(max(i) - min(i))
-        # Para cada linha de V
-        for i in range(1, len(v)):
+    def normalizarX(self, x):
+        self.deltaX = []
+        self.mediaX = []
+        # Para todas as linhas de X
+        for i in x:
+                # calcula a media de cada parametro
+                self.mediaX.append(sum(i) / self.m)
+                # calcula a variacao de cada parametro
+                self.deltaX.append(max(i) - min(i))
+        # Para cada linha de X
+        for i in range(1, len(x)):
             # Normaliza cada item da linha
-            for j in range(m):
-                v[i][j] = (v[i][j] - media[i]) / delta[i]
-        return v
+            for j in range(self.m):
+                x[i][j] = abs((x[i][j] - self.mediaX[i]) / self.deltaX[i])
+        return x
+
+    def normalizarY(self, y):
+        # calcula a media de cada parametro
+        self.mediaY = sum(y) / self.m
+        # calcula a variacao de cada parametro
+        self.deltaY = max(y) - min(y)
+        # Para cada valor de Y
+        for i in range(len(y)):
+            # Normaliza cada item da linha
+            y[i] = abs((y[i] - self.mediaY) / self.deltaY)
+        return y
+
     """
     CUSTO - Calcula o custo total para os testes com os atuais valores de TETA
      J = SUM( H(teta, x) - Y ) / 2M
@@ -47,7 +58,7 @@ class RegressaoLinear(object):
             # e depois subtrai o Yi
             #   - i: linha do caso de teste
             #   - j: índice do X (x0, x1, x2, etc)
-            c += (self.h(self.teta, [self.x[j][i] for j in range(self.x)]) - self.y[i]) ** 2
+            c += (self.h(self.teta, [self.x[j][i] for j in range(len(self.x))]) - self.y[i]) ** 2
         return c / (2 * self.m)
 
     """
@@ -66,7 +77,7 @@ class RegressaoLinear(object):
                 # Incrementa em (H(teta, x) - Y) para cada caso de teste
                 # Forja o vetor X pegando as K colunas de uma i linha
                 # E por fim subtrai Yi * Xi, para o X de mesmo índice que TETAi
-                aux += (self.h(self.teta, [self.x[j][i] for j in range(self.x)]) - self.y[i]) * self.x[t][i]
+                aux += (self.h(self.teta, [self.x[j][i] for j in range(len(self.x))]) - self.y[i]) * self.x[t][i]
             # É multiplicada pela taxa de aprendizado
             aux *= self.alfa
             # e dividido pela quantidade de elementos
@@ -76,11 +87,12 @@ class RegressaoLinear(object):
             # Adiciona TETAi a lista de novos testas
             novo.append(aux)
         # A lista de TETA recebe os NOVOS valores
+        print(self.teta)
         self.teta = novo
 
     """
     SOLVE: aplica a regressão linear para encontrar os parâmetros TETA que melhor se ajustam
-    - Realiza um número máximo de interações delimitado por MAX_INTERACOES 
+     - Realiza um número máximo de interações delimitado por MAX_INTERACOES 
     """
     def solve(self):
         i = 0
@@ -98,4 +110,7 @@ class RegressaoLinear(object):
 
     # Função que possibilita realizar teste com a funçãoe criada a partir da regressão
     def test(self, x):
-        return self.h(self.teta, x)
+        for i in range(1,len(x)):
+            x[i] = abs((x[i] - self.mediaX[i]) / self.deltaX[i])
+        y = (self.h(self.teta, x) * self.deltaY) + self.mediaY
+        return y

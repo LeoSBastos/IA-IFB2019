@@ -14,7 +14,7 @@ O arquivo data.txt possui a seguinte formatação
 """
 def reader(file_name):
     # Lista com todos os Xs e Ys utilizados para o aprendizado
-    x, y = [], []
+    y = []
     # Leitura do arquivo
     with open(file_name, 'r') as file:
         # Lê o arquivo e cria um vetor com todas as linhas dele
@@ -22,7 +22,7 @@ def reader(file_name):
         # Lê o número de colunas
         colunas = int(linhas[0])
         # Lista de X indo de X0 ate Xn-1
-        x.append( (colunas - 1) * list())
+        x= [[] for i in range(colunas - 1)]
         # Leitura dos parâmetros, que começam na linha 6
         for l in linhas[6:]:
             # Particiona a linha em vetores
@@ -31,7 +31,7 @@ def reader(file_name):
             for i in range(colunas):
                 # X0 - A coluna 0 é o index
                 if i == 0:
-                    x[0].append(int(c[0]))
+                    x[0].append(1)
                 # XN com N > 0
                 elif 0 < i < (colunas - 1):
                     x[i].append(int(c[i]))
@@ -43,12 +43,11 @@ def reader(file_name):
 
 if __name__ == "__main__":
     # Chama a função para ler o arquivo e retornar os vetores X e Y
-    x, y = reader('data.1.txt')
+    x, y = reader('data_1.txt')
     
     # Funcção C: calcula o tamanho do peixe com base na idade e temperatura da agua
     def c(teta, x): return sum([(teta[i]*x[i]) for i in range(len(teta))])
 
     r = rl(x, y, c)
-    #r.solve()
-    #print(r.test([1, 2104, 3]))
-    print(r.x, r.y)
+    r.solve()
+    print(r.test([1, 97,  25]))
