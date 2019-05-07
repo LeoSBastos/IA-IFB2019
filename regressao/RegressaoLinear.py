@@ -29,6 +29,8 @@ class RegressaoLinear(object):
     def custo(self):
         return sum([(self.h(self.teta, self.x[i]) - self.y[i]) ** 2 for i in range(self.m)]) / (2 * self.m)
 
+    """
+    """
     def atualiza_teta(self):
         novo = list()
         for j in range(len(self.x[1])):
