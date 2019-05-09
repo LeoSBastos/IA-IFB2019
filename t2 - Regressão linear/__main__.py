@@ -40,6 +40,17 @@ def reader(file_name):
                     y.append(int(c[i]))
     # retorna a matriz de valor X e os Y resultados
     return x, y
+#Utilizando esse modulo externo para criacao de uma tabela ASCII com os dados de resultado
+from prettytable import PrettyTable
+
+#Classe dedicada para a impressao
+class Impressao:
+    def __init__(self, r):
+        self.r = r
+        #Criacao de uma variavel da biblioteca externa que recebe como parametro o nome das colunas
+        self.Tabela = PrettyTable(["Tetas","Y do Teste"])
+        #Metodo para adicionar linhas de acordo com o numero de colunas com as variaveis dadas
+        self.Tabela.add_row([self.r.teta,self.r.yFinal])
 
 if __name__ == "__main__":
     # Chama a função para ler o arquivo e retornar os vetores X e Y
@@ -50,4 +61,6 @@ if __name__ == "__main__":
 
     r = rl(x, y, c)
     r.solve()
-    print(r.test([1, 97,  25]))
+    r.test([1, 97,  25])
+    table = Impressao(r)
+    print(table.Tabela)

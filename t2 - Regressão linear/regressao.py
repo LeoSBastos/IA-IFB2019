@@ -1,10 +1,12 @@
+from math import log
+
 class RegressaoLinear(object):
     # Número máximo de vezes que será aplicada a regressao linear
-    MAX_INTERACOES = 10000
+    MAX_INTERACOES = 100000
     # Custo mínimo, é uma das condições de parada do método solve()
     MIN_CUSTO = 1E-5
 
-    def __init__(self, x, y, h, alfa=5E-3, normaliza = True):
+    def __init__(self, x, y, h, alfa=5E-3, normaliza = True, lineariza = True):
         self.x = x # Matriz de variáveis para aprendizado X
         self.y = y # Matriz de resultado para aprendizado X
         self.h = h # Funcao de hipótese
@@ -14,6 +16,11 @@ class RegressaoLinear(object):
         if normaliza:
             self.x = self.normalizarX(self.x)
             self.y = self.normalizarY(self.y)
+        # Não utilizamos pois não se pode usa logaritmo natural dos 
+        # números negativos que sairam da normalização
+        # if lineariza:
+        #     self.x = self.linearizarX(self.x)
+        #     self.y = self.linearizarY(self.y)
     """
     NORMALIZAR - Normaliza os valores de uma matriz
      - A normalização é aplicada linha a linha
@@ -32,19 +39,40 @@ class RegressaoLinear(object):
         for i in range(1, len(x)):
             # Normaliza cada item da linha
             for j in range(self.m):
-                x[i][j] = abs((x[i][j] - self.mediaX[i]) / self.deltaX[i])
+                x[i][j] = (x[i][j] - self.mediaX[i]) / self.deltaX[i]
         return x
 
     def normalizarY(self, y):
-        # calcula a media de cada parametro
+        # calcula a media do Y
         self.mediaY = sum(y) / self.m
-        # calcula a variacao de cada parametro
+        # calcula a variacao do Y
         self.deltaY = max(y) - min(y)
         # Para cada valor de Y
         for i in range(len(y)):
-            # Normaliza cada item da linha
-            y[i] = abs((y[i] - self.mediaY) / self.deltaY)
+            # Normaliza cada item de Y
+            y[i] = (y[i] - self.mediaY) / self.deltaY
         return y
+
+    # def linearizarX(self, x):
+    #     # Para cada linha de X
+    #     for i in range(1, len(x)):
+    #         # Lineariza cada item da linha
+    #         for j in range(self.m):
+    #             if x[i][j] > 0:
+    #                 x[i][j] = log(x[i][j])
+    #             elif x[i][j] < 0:
+    #                 x[i][j] = -log(abs(x[i][j]))
+    #     return x
+
+    # def linearizarY(self, y):
+    #     # Para cada valor de Y
+    #     for i in range(len(y)):
+    #         # Lineariza cada item de Y
+    #         if y[i] > 0:
+    #             y[i] = log(y[i])
+    #         elif y[i] < 0:
+    #             y[i] = -log(abs(y[i]))
+    #     return y
 
     """
     CUSTO - Calcula o custo total para os testes com os atuais valores de TETA
@@ -87,7 +115,7 @@ class RegressaoLinear(object):
             # Adiciona TETAi a lista de novos testas
             novo.append(aux)
         # A lista de TETA recebe os NOVOS valores
-        print(self.teta)
+        # print(self.teta)
         self.teta = novo
 
     """
@@ -111,6 +139,5 @@ class RegressaoLinear(object):
     # Função que possibilita realizar teste com a funçãoe criada a partir da regressão
     def test(self, x):
         for i in range(1,len(x)):
-            x[i] = abs((x[i] - self.mediaX[i]) / self.deltaX[i])
-        y = (self.h(self.teta, x) * self.deltaY) + self.mediaY
-        return y
+            x[i] = (x[i] - self.mediaX[i]) / self.deltaX[i]
+        self.yFinal = (self.h(self.teta, x) * self.deltaY) + self.mediaY
