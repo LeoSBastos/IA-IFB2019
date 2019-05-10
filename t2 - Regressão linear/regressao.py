@@ -1,4 +1,4 @@
-from math import log
+from math import log, exp
 
 class RegressaoLinear(object):
     # Número máximo de vezes que será aplicada a regressao linear
@@ -6,21 +6,24 @@ class RegressaoLinear(object):
     # Custo mínimo, é uma das condições de parada do método solve()
     MIN_CUSTO = 1E-5
 
-    def __init__(self, x, y, h, alfa=5E-3, normaliza = True, lineariza = True):
+    def __init__(self, x, y, h, alfa=1E-7, normaliza = False, lineariza = False):
         self.x = x # Matriz de variáveis para aprendizado X
         self.y = y # Matriz de resultado para aprendizado X
         self.h = h # Funcao de hipótese
         self.m = len(self.y) # Quantidade de amostras
         self.teta = [1]*len(self.x)# Constantes da função: que serão otmizados pela regressao
         self.alfa = alfa # Taxa de aprendizagem
-        if normaliza:
+        #Utilizadas para decidir se vai ou não ser normalizado e/ou linearizado a regressão
+        self.normaliza = normaliza 
+        self.lineariza = lineariza
+        #Chama os métodos criados para normalizar os valores
+        if self.normaliza:
             self.x = self.normalizarX(self.x)
             self.y = self.normalizarY(self.y)
-        # Não utilizamos pois não se pode usa logaritmo natural dos 
-        # números negativos que sairam da normalização
-        # if lineariza:
-        #     self.x = self.linearizarX(self.x)
-        #     self.y = self.linearizarY(self.y)
+        # Chama os métodos criados para linearizar os valores
+        if self.lineariza:
+            self.x = self.linearizarX(self.x)
+            self.y = self.linearizarY(self.y)
     """
     NORMALIZAR - Normaliza os valores de uma matriz
      - A normalização é aplicada linha a linha
@@ -53,26 +56,26 @@ class RegressaoLinear(object):
             y[i] = (y[i] - self.mediaY) / self.deltaY
         return y
 
-    # def linearizarX(self, x):
-    #     # Para cada linha de X
-    #     for i in range(1, len(x)):
-    #         # Lineariza cada item da linha
-    #         for j in range(self.m):
-    #             if x[i][j] > 0:
-    #                 x[i][j] = log(x[i][j])
-    #             elif x[i][j] < 0:
-    #                 x[i][j] = -log(abs(x[i][j]))
-    #     return x
+    def linearizarX(self, x):
+        # Para cada linha de X
+        for i in range(1, len(x)):
+            # Lineariza cada item da linha
+            for j in range(self.m):
+                if x[i][j] > 0:
+                    x[i][j] = log(x[i][j])
+                elif x[i][j] < 0:
+                    x[i][j] = -log(abs(x[i][j]))
+        return x
 
-    # def linearizarY(self, y):
-    #     # Para cada valor de Y
-    #     for i in range(len(y)):
-    #         # Lineariza cada item de Y
-    #         if y[i] > 0:
-    #             y[i] = log(y[i])
-    #         elif y[i] < 0:
-    #             y[i] = -log(abs(y[i]))
-    #     return y
+    def linearizarY(self, y):
+        # Para cada valor de Y
+        for i in range(len(y)):
+            # Lineariza cada item de Y
+            if y[i] > 0:
+                y[i] = log(y[i])
+            elif y[i] < 0:
+                y[i] = -log(abs(y[i]))
+        return y
 
     """
     CUSTO - Calcula o custo total para os testes com os atuais valores de TETA
@@ -80,7 +83,7 @@ class RegressaoLinear(object):
     """
     def custo(self):
         c = 0
-        # Peercorre os M itens da amostra
+        # Percorre os M itens da amostra
         for i in range(self.m):
             # Passa como parametros a variável teta e uma lista com todos os Xji
             # e depois subtrai o Yi
@@ -137,7 +140,14 @@ class RegressaoLinear(object):
         pass
 
     # Função que possibilita realizar teste com a funçãoe criada a partir da regressão
-    def test(self, x):
-        for i in range(1,len(x)):
-            x[i] = (x[i] - self.mediaX[i]) / self.deltaX[i]
-        self.yFinal = (self.h(self.teta, x) * self.deltaY) + self.mediaY
+    def calculaY(self, x):
+        #Verifica se foi normalizado para normalizar os valores de X e então "desnormalizar" o valor de y
+        if self.normaliza:
+            for i in range(1,len(x)):
+                x[i] = (x[i] - self.mediaX[i]) / self.deltaX[i]
+            self.yFinal = (self.h(self.teta, x) * self.deltaY) + self.mediaY
+        else:
+            self.yFinal = self.h(self.teta,x)
+        #Verifica se foi linearizado para depois usar exponencial elevado a y para conseguir o valor final
+        if self.lineariza:
+            self.yFinal = exp(self.yFinal)

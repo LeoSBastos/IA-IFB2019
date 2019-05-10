@@ -56,11 +56,17 @@ if __name__ == "__main__":
     # Chama a função para ler o arquivo e retornar os vetores X e Y
     x, y = reader('data_1.txt')
     
-    # Funcção C: calcula o tamanho do peixe com base na idade e temperatura da agua
+    # Função C: calcula o tamanho do peixe com base na idade e temperatura da agua
     def c(teta, x): return sum([(teta[i]*x[i]) for i in range(len(teta))])
-
+    
+    #Crie a classe de Regressão Linear com os vetores x, y e a função custo C
     r = rl(x, y, c)
+    #Utiliza a função solve que atualiza os tetas e a função custo de acordo com o número de iterações que foram selecionadas.
     r.solve()
-    r.test([1, 97,  25])
+    #Coloca os seguintes valores de X para tentar calcular 
+    r.calculaY([1, 14,  25])
+
+    #Cria a classe de Impressão
     table = Impressao(r)
+    #Imprime a tabela
     print(table.Tabela)
