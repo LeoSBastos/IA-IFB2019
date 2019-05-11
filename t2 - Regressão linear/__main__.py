@@ -40,17 +40,31 @@ def reader(file_name):
                     y.append(int(c[i]))
     # retorna a matriz de valor X e os Y resultados
     return x, y
+
 #Utilizando esse modulo externo para criacao de uma tabela ASCII com os dados de resultado
 from prettytable import PrettyTable
 
 #Classe dedicada para a impressao
 class Impressao:
     def __init__(self, r):
+        #Colocando uma variável para fácil acesso da Regressão
         self.r = r
+
+    #Método para impressão dos tetas
+    def TabTeta(self):
         #Criacao de uma variavel da biblioteca externa que recebe como parametro o nome das colunas
-        self.Tabela = PrettyTable(["Tetas","Y do Teste"])
+        Tabela = PrettyTable(["Tetas"])
         #Metodo para adicionar linhas de acordo com o numero de colunas com as variaveis dadas
-        self.Tabela.add_row([self.r.teta,self.r.yFinal])
+        Tabela.add_row([self.r.teta])
+        return Tabela
+
+    #Método para a impressão dos Y resultantes
+    def TabResultado(self):
+        #Criacao de uma variavel da biblioteca externa que recebe como parametro o nome das colunas
+        Tabela = PrettyTable(["Comprimento do Peixe(mm)"])
+        #Metodo para adicionar linhas de acordo com o numero de colunas com as variaveis dadas
+        Tabela.add_row([self.r.yFinal])
+        return Tabela
 
 if __name__ == "__main__":
     # Chama a função para ler o arquivo e retornar os vetores X e Y
@@ -63,10 +77,15 @@ if __name__ == "__main__":
     r = rl(x, y, c)
     #Utiliza a função solve que atualiza os tetas e a função custo de acordo com o número de iterações que foram selecionadas.
     r.solve()
-    #Coloca os seguintes valores de X para tentar calcular 
-    r.calculaY([1, 14,  25])
-
-    #Cria a classe de Impressão
-    table = Impressao(r)
-    #Imprime a tabela
-    print(table.Tabela)
+    #Imprime os tetas
+    print(Impressao(r).TabTeta())
+    #String input para usar no loop e nos cálculos
+    s = input("Digite o valor da Temperatura e da Idade separados por espaço ou digite sair para sair: ")
+    while s.lower() != "sair":
+        #Separando as váriaveis da string do input
+        t,i = (int(x) for x in s.split())
+        #Coloca os seguintes valores de X para tentar calcular 
+        r.calculaY([1,t,i])
+        #Imprime o y resultante
+        print(Impressao(r).TabResultado())
+        s = input("Digite o valor da Temperatura e da Idade separados por espaço ou digite sair para sair: ")
