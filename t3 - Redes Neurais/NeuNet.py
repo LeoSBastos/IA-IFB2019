@@ -1,13 +1,16 @@
+#Importacao necessaria para o funcionamento do tensorflow
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-#tensor
+#Importacao do tensorflow e do backend Keras
 import tensorflow as tf
 from tensorflow import keras
 
-
+#Importacao do numpy e do matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
+#Importacao do random para a geracao de imagens aleatorias
 import random
+#Importacao para a criacao
 import os
 from pathlib import Path
 
@@ -38,34 +41,33 @@ class NeuNet:
 
     
     def plot_image(self,i, predictions_array, true_label, img):
-      predictions_array, true_label, img = predictions_array[i], true_label[i], img[i]
-      plt.grid(False)
-      plt.xticks([])
-      plt.yticks([])
-      
-      plt.imshow(img, cmap=plt.cm.binary)
+        predictions_array, true_label, img = predictions_array[i], true_label[i], img[i]
+        plt.grid(False)
+        plt.xticks([])
+        plt.yticks([])
+        plt.imshow(img, cmap=plt.cm.binary)
     
-      predicted_label = np.argmax(predictions_array)
-      if predicted_label == true_label:
-        color = 'blue'
-      else:
-        color = 'red'
-      
-      plt.xlabel("IMG N{}: {} {:2.0f}% ({})".format(i,self.classes[predicted_label],
+        predicted_label = np.argmax(predictions_array)
+        if predicted_label == true_label:
+            color = 'blue'
+        else:
+            color = 'red'
+
+        plt.xlabel("IMG N{}: {} {:2.0f}% ({})".format(i,self.classes[predicted_label],
                                     100*np.max(predictions_array),
                                     self.classes[true_label]),
                                     color=color)
 
     def plot_value_array(self, i, predictions_array, true_label):
-      predictions_array, true_label = predictions_array[i], true_label[i]
-      plt.grid(False)
-      plt.xticks([])
-      plt.yticks([])
-      thisplot = plt.bar(range(10), predictions_array, color="#777777")
-      plt.ylim([0, 1]) 
-      predicted_label = np.argmax(predictions_array)
-      thisplot[predicted_label].set_color('red')
-      thisplot[true_label].set_color('blue')
+        predictions_array, true_label = predictions_array[i], true_label[i]
+        plt.grid(False)
+        plt.xticks([])
+        plt.yticks([])
+        thisplot = plt.bar(range(10), predictions_array, color="#a9a9a9")
+        plt.ylim([0, 1]) 
+        predicted_label = np.argmax(predictions_array)
+        thisplot[predicted_label].set_color('red')
+        thisplot[true_label].set_color('blue')
 
     def PlotGraph(self):
         num_images = self.plot_linha*self.plot_coluna
