@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 
 class NeuNet:
-    def __init__(self,train_x,train_label,test_x,test_label,epochs,ti,plot_linha=5, plot_coluna=5)
+    def __init__(self,train_x,train_label,test_x,test_label,epochs,ti,plot_linha=5, plot_coluna=5):
         #Numero de linhas e colunas(imagem e grafico de barras e considerado uma coluna)
         #da imagem que foram desenhadas
         self.plot_linha=plot_linha
