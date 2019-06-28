@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jun 11 13:46:12 2019
-
 @author: Jeronimo Hermano
 """
 
@@ -97,8 +96,8 @@ def desnormalizaCentroids(centroids):
     global desvio_carbono
     global desvio_milhagem
     for i in range(len(centroids)):
-        centroids[i][0] = (centroids[i] * desvio_carbono) + media_carbono
-        centroids[i][1] = (centroids[i] * desvio_carbono) + media_carbono
+        centroids[i][0] = (centroids[i][0] * desvio_carbono) + media_carbono
+        centroids[i][1] = (centroids[i][1] * desvio_carbono) + media_carbono
     return centroids
 
 
@@ -126,10 +125,11 @@ if __name__=="__main__":
     # Caso de teste que será impresso mais detalhadamente
     cl2 = Cluster(carros_normalizado,5)
     
-    tab_centroides = PrettyTable(["Classe", "Custo local", "Nodes"])#,"Coordenada X", "Coordenada Y"])
+    tab_centroides = PrettyTable(["Classe", "Custo local", "Nodes","Coordenada X", "Coordenada Y"])
     tab_centroides.align = 'l'
-    for l in cl2.solve(final=True):
-        tab_centroides.add_row(l)
+    for i, l in enumerate(cl2.solve(final=True)):
+        cl2.centroid = desnormalizaCentroids(cl2.centroid)
+        tab_centroides.add_row([l[0],l[1],l[2],cl2.centroid[i][0],cl2.centroid[i][1]])
     # Configuração da tabela de carros
     tab_carros = PrettyTable(["Modelo", "Centroid"])
     tab_carros.align = 'l'
@@ -144,4 +144,4 @@ if __name__=="__main__":
     #   
     print(tab_centroides)
     #   Gráfico com os pontos iniciais dos carros e os pontos das centróides
-#    cl2.plot()
+    cl2.plot()
